@@ -66,3 +66,34 @@ jobs:
             -   name: Push Docker Image
                 run: |
                     docker push ${{ secrets.DOCKERHUB_USERNAME }}/log8100-projet:latest
+    deploy:
+        runs-on: ubuntu-latest
+        # needs: [ build ]
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v3
+
+            -   name: Set up Terraform
+                uses: hashicorp/setup-terraform@v2
+                with:
+                    terraform_version: 1.5.0
+
+            -   uses: azure/login@v2
+                with:
+                    client-id: ${{ secrets.AZURE_CLIENT_ID }}
+                    tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+                    subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+            -   name: Initialize Terraform
+                run: terraform init
+
+            # -   name: Apply Terraform Configuration
+            #     run: terraform apply -auto-approve
+
+            # -   name: Get AKS credentials
+            #     run: az aks get-credentials --resource-group rg-k8s-demo --name aks-cluster
+
+            # -   name: Deploy Kubernetes Resources
+            #     run: |
+            #         kubectl apply -f k8s-deployment.yaml
+            #         kubectl apply -f k8s-ingress.yaml
