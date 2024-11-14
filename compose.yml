@@ -1,0 +1,14 @@
+services:
+  app:
+    image: webgoat/webgoat
+    container_name: log8100-final-webgoat
+    # ports:
+    #   - 8080:8080
+    #   - 9090:9090
+    restart: unless-stopped
+    networks: 
+      net:
+networks:
+  net:
+    external: true
+    name: ${wan_services}
