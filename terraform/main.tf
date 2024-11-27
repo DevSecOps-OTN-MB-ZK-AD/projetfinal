@@ -1,45 +1,80 @@
-provider "azurerm" {
-  features {}
-  subscription_id = var.appId
-  client_id       = var.displayName
-  client_secret   = var.password
-  tenant_id       = var.tenant
-}
-
-resource "azurerm_resource_group" "rg" {
-  name     = "rg-k8s-demo"
-  location = "East US"
-}
-
-resource "azurerm_kubernetes_cluster" "aks" {
-  name                = "aks-cluster"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  dns_prefix          = "aks-demo"
-
-  default_node_pool {
-    name       = "default"
-    node_count = 2
-    vm_size    = "Standard_DS2_v2"
-  }
-
-  identity {
-    type = "SystemAssigned"
-  }
-
-  tags = {
-    environment = "production"
+terraform {
+  required_version = ">= 1.5.7"
+  required_providers {
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "> 2.23.0"
+    }
   }
 }
 
-resource "azurerm_kubernetes_cluster_node_pool" "additional_nodes" {
-  name                  = "extra-nodes"
-  kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  node_count            = 2
-  vm_size               = "Standard_B1s"
+provider "kubernetes" {
+  config_path = "C:/Users/MAziz/.kube/config"  # Ensure this points to your Minikube kubeconfig
 }
 
-# Outputs for later use
-output "kube_config" {
-  value = azurerm_kubernetes_cluster.aks.kube_config.0.raw_kube_config
+# Create a Kubernetes namespace for the final project
+resource "kubernetes_namespace" "final_project" {
+  metadata {
+    name = "final-project-devsecops"
+  }
+}
+
+# Create a deployment with 2 replicas (scalable containers/pods) for the final project
+resource "kubernetes_deployment" "final_project_app" {
+  metadata {
+    name      = "final-project-app"
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+    labels = {
+      app = "final-project-app"
+    }
+  }
+
+  spec {
+    replicas = 2  # Number of containers/pods to run
+
+    selector {
+      match_labels = {
+        app = "final-project-app"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "final-project-app"
+        }
+      }
+
+      spec {
+        container {
+          name  = "final-project-container"
+          image = "nginx:latest"  # c'est un test et à remplacer par l'image de l'app
+          port {
+            container_port = 80
+          }
+        }
+      }
+    }
+  }
+}
+
+# Create a service to expose the final project app with load balancing
+resource "kubernetes_service" "final_project_app" {
+  metadata {
+    name      = "final-project-service"
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "final-project-app"
+    }
+
+    port {
+      port        = 80
+      target_port = 80
+    }
+
+    type = "LoadBalancer"
+  }
 }
