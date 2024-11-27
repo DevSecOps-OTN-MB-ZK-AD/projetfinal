@@ -57,3 +57,15 @@ TestClass.class
 /.gitconfig
 
 webgoat.gitconfig
+
+
+# Terraform state files
+terraform.tfstate
+terraform.tfstate.backup
+
+# Terraform provider binaries and cache
+.terraform/
+
+# Ignore execution-specific files (if any)
+*.exe
+*.log
