@@ -1,3 +1,7 @@
+variable "dockerhub_image" {
+  description = "DockerHub image to deploy"
+}
+
 terraform {
   required_version = ">= 1.5.7"
   required_providers {
@@ -9,7 +13,7 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "C:/Users/MAziz/.kube/config"  # Ensure this points to your Minikube kubeconfig
+  config_path = "C:/Users/MAziz/.kube/config" 
 }
 
 # Create a Kubernetes namespace for the final project
@@ -48,7 +52,8 @@ resource "kubernetes_deployment" "final_project_app" {
       spec {
         container {
           name  = "final-project-container"
-          image = "nginx:latest"  # Replace with your DockerHub image
+          image = var.dockerhub_image
+          image_pull_policy = "Always"
           port {
             container_port = 80
           }

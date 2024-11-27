@@ -1,0 +1,22 @@
+name: Deploy with Terraform
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_wrapper: false
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
+      env:
+        TF_VAR_dockerhub_image: "${{ secrets.DOCKERHUB_USERNAME }}/log8100-projet:latest"
+      run: terraform apply -auto-approve
