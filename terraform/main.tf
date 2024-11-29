@@ -48,9 +48,9 @@ resource "kubernetes_deployment" "final_project_app" {
       spec {
         container {
           name  = "final-project-container"
-          image = "nginx:latest"  # c'est un test et à remplacer par l'image de l'app
+          image = "oliviertremblaynoel/log8100-projet"
           port {
-            container_port = 80
+            container_port = 8080
           }
         }
       }
@@ -71,8 +71,8 @@ resource "kubernetes_service" "final_project_app" {
     }
 
     port {
-      port        = 80
-      target_port = 80
+      port        = 8080
+      target_port = 8080
     }
 
     type = "LoadBalancer"
