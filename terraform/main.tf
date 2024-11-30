@@ -79,6 +79,30 @@ resource "kubernetes_service" "final_project_app" {
   }
 }
 
+## ConfigMap pour prometheus.yml
+resource "kubernetes_config_map" "prometheus_config" {
+  metadata {
+    name      = "prometheus-config"
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+  }
+
+  data = {
+    "prometheus.yml" = <<EOT
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "kubernetes-pods"
+    static_configs:
+      - targets: ["localhost:8080"]
+
+  - job_name: "kube-state-metrics"
+    static_configs:
+      - targets: ["kube-state-metrics.final-project-devsecops.svc.cluster.local:8080"]
+EOT
+  }
+}
+
 # CHANGEMENT : Ajout du déploiement de Prometheus
 resource "kubernetes_deployment" "prometheus" {
   metadata {
@@ -112,7 +136,19 @@ resource "kubernetes_deployment" "prometheus" {
           port {
             container_port = 9090 # Port utilisé par Prometheus
           }
+          volume_mount { # AJOUTÉ
+            name       = "prometheus-config-volume" # AJOUTÉ
+            mount_path = "/etc/prometheus/prometheus.yml" # AJOUTÉ
+            sub_path   = "prometheus.yml" # AJOUTÉ
+          } # AJOUTÉ
         }
+        volume { # AJOUTÉ
+          name = "prometheus-config-volume" # AJOUTÉ
+
+          config_map { # AJOUTÉ
+            name = kubernetes_config_map.prometheus_config.metadata[0].name # AJOUTÉ
+          } # AJOUTÉ
+        } # AJOUTÉ
       }
     }
   }
