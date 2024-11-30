@@ -234,3 +234,65 @@ resource "kubernetes_service" "grafana" {
     type = "LoadBalancer" # Permet un accès externe
   }
 }
+
+
+# Déploiement de kube-state-metrics
+resource "kubernetes_deployment" "kube_state_metrics" {
+  metadata {
+    name      = "kube-state-metrics"
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+    labels = {
+      app = "kube-state-metrics"
+    }
+  }
+
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        app = "kube-state-metrics"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "kube-state-metrics"
+        }
+      }
+
+      spec {
+        container {
+          name  = "kube-state-metrics"
+          image = "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.9.2"
+
+          port {
+            container_port = 8080
+          }
+        }
+      }
+    }
+  }
+}
+
+# Service pour kube-state-metrics
+resource "kubernetes_service" "kube_state_metrics" {
+  metadata {
+    name      = "kube-state-metrics"
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "kube-state-metrics"
+    }
+
+    port { 
+      port        = 8080
+      target_port = 8080
+    }
+
+    type = "ClusterIP" # Utilisez ClusterIP pour le DNS interne
+  }
+}
