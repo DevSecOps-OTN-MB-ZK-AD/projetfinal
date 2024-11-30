@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "kubernetes" {
-  config_path = "C:/Users/MAziz/.kube/config"  # Ensure this points to your Minikube kubeconfig
+  config_path = "C:/Users/owner/.kube/config"  # Ensure this points to your Minikube kubeconfig
 }
 
 # Create a Kubernetes namespace for the final project
@@ -76,5 +76,125 @@ resource "kubernetes_service" "final_project_app" {
     }
 
     type = "LoadBalancer"
+  }
+}
+
+# CHANGEMENT : Ajout du déploiement de Prometheus
+resource "kubernetes_deployment" "prometheus" {
+  metadata {
+    name      = "prometheus" # Nom du déploiement
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+    labels = {
+      app = "prometheus" # Étiquette pour identifier les pods
+    }
+  }
+
+  spec {
+    replicas = 1 # Un seul pod pour Prometheus
+
+    selector {
+      match_labels = {
+        app = "prometheus"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "prometheus"
+        }
+      }
+
+      spec {
+        container {
+          name  = "prometheus" # Nom du conteneur
+          image = "prom/prometheus:latest" # Image Docker de Prometheus
+          port {
+            container_port = 9090 # Port utilisé par Prometheus
+          }
+        }
+      }
+    }
+  }
+}
+
+# CHANGEMENT : Service pour exposer Prometheus
+resource "kubernetes_service" "prometheus" {
+  metadata {
+    name      = "prometheus-service" # Nom du service
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "prometheus" # Lie le service au déploiement via l'étiquette
+    }
+
+    port {
+      port        = 9090 # Port exposé par le service
+      target_port = 9090 # Port du conteneur Prometheus
+    }
+
+    type = "LoadBalancer" # Permet un accès externe
+  }
+}
+
+# CHANGEMENT : Ajout du déploiement de Grafana
+resource "kubernetes_deployment" "grafana" {
+  metadata {
+    name      = "grafana" # Nom du déploiement
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+    labels = {
+      app = "grafana" # Étiquette pour identifier les pods
+    }
+  }
+
+  spec {
+    replicas = 1 # Un seul pod pour Grafana
+
+    selector {
+      match_labels = {
+        app = "grafana"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          app = "grafana"
+        }
+      }
+
+      spec {
+        container {
+          name  = "grafana" # Nom du conteneur
+          image = "grafana/grafana:latest" # Image Docker de Grafana
+          port {
+            container_port = 3000 # Port utilisé par Grafana
+          }
+        }
+      }
+    }
+  }
+}
+
+# CHANGEMENT : Service pour exposer Grafana
+resource "kubernetes_service" "grafana" {
+  metadata {
+    name      = "grafana-service" # Nom du service
+    namespace = kubernetes_namespace.final_project.metadata[0].name
+  }
+
+  spec {
+    selector = {
+      app = "grafana" # Lie le service au déploiement via l'étiquette
+    }
+
+    port {
+      port        = 3000 # Port exposé par le service
+      target_port = 3000 # Port du conteneur Grafana
+    }
+
+    type = "LoadBalancer" # Permet un accès externe
   }
 }

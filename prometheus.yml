@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'kubernetes-pods'
+    static_configs:
+      - targets: ['localhost:8080']
+
+  - job_name: 'kube-state-metrics'
+    static_configs:
+      - targets: ['kube-state-metrics.final-project-devsecops.svc.cluster.local:8080']
