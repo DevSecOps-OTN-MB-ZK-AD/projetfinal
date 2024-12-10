@@ -73,6 +73,39 @@ jobs:
                 run: |
                     docker push ${{ secrets.DOCKERHUB_USERNAME }}/log8100-projet:latest
 
+    scan:
+        name: Vulnerability Scanning
+        runs-on: ubuntu-latest
+        needs: [ build ]
+        steps:
+            -   uses: actions/checkout@v4.1.6
+            -   name: Log in to DockerHub
+                uses: docker/login-action@v2
+                with:
+                    username: ${{ secrets.DOCKERHUB_USERNAME }}
+                    password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+            -   name: Cache Trivy DB
+                uses: actions/cache@v4
+                with:
+                    path: ~/.cache/trivy
+                    key: trivy-db-${{ runner.os }}-${{ github.sha }}
+                    restore-keys: triy-db-${{ runner.os }}-
+
+            -   name: Run Trivy Scan
+                uses: aquasecurity/trivy-action@master
+                with:
+                    image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/log8100-projet:latest
+                    format: sarif
+                    output: trivy-report.sarif
+                    timeout: 30m
+
+            -   name: Upload Trivy Report
+                uses: actions/upload-artifact@v3
+                with:
+                    name: trivy-report
+                    path: trivy-report.sarif
+
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
     # deploy:
     #     runs-on: ubuntu-latest
