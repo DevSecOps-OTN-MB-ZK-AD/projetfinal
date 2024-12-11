@@ -79,7 +79,7 @@ resource "kubernetes_service" "final_project_app" {
   }
 }
 
-## ConfigMap pour prometheus.yml
+## ConfigMap for prometheus.yml but need to change it 
 resource "kubernetes_config_map" "prometheus_config" {
   metadata {
     name      = "prometheus-config"
@@ -92,18 +92,23 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "kubernetes-pods"
+  - job_name: 'kube-state-metrics'
     static_configs:
-      - targets: ["localhost:8080"]
+      - targets: ['kube-state-metrics.final-project-devsecops.svc.cluster.local:8080']
 
-  - job_name: "kube-state-metrics"
+  - job_name: 'webgoat'
+    metrics_path: '/WebGoat/actuator/prometheus' 
     static_configs:
-      - targets: ["kube-state-metrics.final-project-devsecops.svc.cluster.local:8080"]
+      - targets: ['final-project-app.final-project-devsecops.svc.cluster.local:8080']
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
 EOT
   }
 }
 
-# CHANGEMENT : Ajout du déploiement de Prometheus
+# déploiement de Prometheus
 resource "kubernetes_deployment" "prometheus" {
   metadata {
     name      = "prometheus" # Nom du déploiement
@@ -136,25 +141,25 @@ resource "kubernetes_deployment" "prometheus" {
           port {
             container_port = 9090 # Port utilisé par Prometheus
           }
-          volume_mount { # AJOUTÉ
-            name       = "prometheus-config-volume" # AJOUTÉ
-            mount_path = "/etc/prometheus/prometheus.yml" # AJOUTÉ
-            sub_path   = "prometheus.yml" # AJOUTÉ
-          } # AJOUTÉ
+          volume_mount { 
+            name       = "prometheus-config-volume"
+            mount_path = "/etc/prometheus/prometheus.yml" 
+            sub_path   = "prometheus.yml" 
+          } 
         }
-        volume { # AJOUTÉ
-          name = "prometheus-config-volume" # AJOUTÉ
+        volume { 
+          name = "prometheus-config-volume" 
 
-          config_map { # AJOUTÉ
-            name = kubernetes_config_map.prometheus_config.metadata[0].name # AJOUTÉ
-          } # AJOUTÉ
-        } # AJOUTÉ
+          config_map { 
+            name = kubernetes_config_map.prometheus_config.metadata[0].name 
+          } 
+        } 
       }
     }
   }
 }
 
-# CHANGEMENT : Service pour exposer Prometheus
+# Service pour exposer Prometheus
 resource "kubernetes_service" "prometheus" {
   metadata {
     name      = "prometheus-service" # Nom du service
@@ -175,7 +180,7 @@ resource "kubernetes_service" "prometheus" {
   }
 }
 
-# CHANGEMENT : Ajout du déploiement de Grafana
+#  déploiement de Grafana
 resource "kubernetes_deployment" "grafana" {
   metadata {
     name      = "grafana" # Nom du déploiement
@@ -214,7 +219,7 @@ resource "kubernetes_deployment" "grafana" {
   }
 }
 
-# CHANGEMENT : Service pour exposer Grafana
+#  Service pour  Grafana
 resource "kubernetes_service" "grafana" {
   metadata {
     name      = "grafana-service" # Nom du service
@@ -293,6 +298,6 @@ resource "kubernetes_service" "kube_state_metrics" {
       target_port = 8080
     }
 
-    type = "ClusterIP" # Utilisez ClusterIP pour le DNS interne
+    type = "ClusterIP" # ClusterIP pour le DNS interne
   }
 }
