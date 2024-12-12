@@ -114,11 +114,11 @@ jobs:
                         exit 1
                     fi
 
-            # Notify when fail 
+            # Notify when fail via trivy report
             -   name: Notify via Webhook
                 if: failure()
                 run: |
-                    curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️}' ${{ secrets.DISCORD_WEBHOOK_URL  }}        
+                    curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️}' ${{ secrets.DISCORD_WEBHOOK_URL }}        
                 
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
     # deploy:

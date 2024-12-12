@@ -159,7 +159,7 @@ resource "kubernetes_deployment" "prometheus" {
   }
 }
 
-# Service pour exposer Prometheus
+# Service pour  Prometheus
 resource "kubernetes_service" "prometheus" {
   metadata {
     name      = "prometheus-service" # Nom du service
@@ -168,7 +168,7 @@ resource "kubernetes_service" "prometheus" {
 
   spec {
     selector = {
-      app = "prometheus" # Lie le service au déploiement via l'étiquette
+      app = "prometheus" 
     }
 
     port {
@@ -183,10 +183,10 @@ resource "kubernetes_service" "prometheus" {
 #  déploiement de Grafana
 resource "kubernetes_deployment" "grafana" {
   metadata {
-    name      = "grafana" # Nom du déploiement
+    name      = "grafana" 
     namespace = kubernetes_namespace.final_project.metadata[0].name
     labels = {
-      app = "grafana" # Étiquette pour identifier les pods
+      app = "grafana" 
     }
   }
 
@@ -298,6 +298,6 @@ resource "kubernetes_service" "kube_state_metrics" {
       target_port = 8080
     }
 
-    type = "ClusterIP" # ClusterIP pour le DNS interne
+    type = "ClusterIP" 
   }
 }
