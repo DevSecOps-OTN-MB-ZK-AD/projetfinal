@@ -110,7 +110,7 @@ jobs:
             # Notify when fail via trivy (for critical vulnerabilities)
             -   name: Notify via Webhook for critial vulnerabilities
                 run: |
-                    if grep -q '"severity": "CRITICAL"' trivy-report.sarif; then
+                    if grep -qi "CRITICAL" trivy-report.sarif; then
                         curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️"}' ${{ secrets.DISCORD_WEBHOOK_URL }}
                     fi
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
