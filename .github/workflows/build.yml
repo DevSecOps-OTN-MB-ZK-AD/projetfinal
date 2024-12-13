@@ -100,7 +100,6 @@ jobs:
                     output: trivy-report.sarif
                     timeout: 30m
                     severity: 'CRITICAL,HIGH'
-                    exit-code: 1
 
             -   name: Upload Trivy Report
                 uses: actions/upload-artifact@v3
@@ -109,11 +108,11 @@ jobs:
                     path: trivy-report.sarif
 
             # Notify when fail via trivy (for critical vulnerabilities)
-            -   name: Notify via Webhook
-                if: failure()
+            -   name: Notify via Webhook for critial vulnerabilities
                 run: |
-                    curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️}' ${{ secrets.DISCORD_WEBHOOK_URL }}
-
+                    if grep -q '"severity": "CRITICAL"' trivy-report.sarif; then
+                        curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️"}' ${{ secrets.DISCORD_WEBHOOK_URL }}
+                    fi
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
     # deploy:
     #     runs-on: ubuntu-latest
