@@ -105,8 +105,8 @@ jobs:
                 with:
                     name: trivy-report
                     path: trivy-report.sarif
-              
-            # Fail if critical vulnerabilities are found   
+
+            # Fail if critical vulnerabilities are found
             -   name: Analyze Trivy Results
                 run: |
                     if grep -q '"CRITICAL"' trivy-report.json; then
@@ -118,8 +118,8 @@ jobs:
             -   name: Notify via Webhook
                 if: failure()
                 run: |
-                    curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️}' ${{ secrets.DISCORD_WEBHOOK_URL }}        
-                
+                    curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️}' ${{ secrets.DISCORD_WEBHOOK_URL }}
+
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
     # deploy:
     #     runs-on: ubuntu-latest

@@ -79,7 +79,7 @@ resource "kubernetes_service" "final_project_app" {
   }
 }
 
-## ConfigMap for prometheus.yml but need to change it 
+## ConfigMap for prometheus.yml but need to change it
 resource "kubernetes_config_map" "prometheus_config" {
   metadata {
     name      = "prometheus-config"
@@ -97,7 +97,7 @@ scrape_configs:
       - targets: ['kube-state-metrics.final-project-devsecops.svc.cluster.local:8080']
 
   - job_name: 'webgoat'
-    metrics_path: '/WebGoat/actuator/prometheus' 
+    metrics_path: '/WebGoat/actuator/prometheus'
     static_configs:
       - targets: ['final-project-service.final-project-devsecops.svc.cluster.local:8080']
 
@@ -141,19 +141,19 @@ resource "kubernetes_deployment" "prometheus" {
           port {
             container_port = 9090 # Port utilisé par Prometheus
           }
-          volume_mount { 
+          volume_mount {
             name       = "prometheus-config-volume"
-            mount_path = "/etc/prometheus/prometheus.yml" 
-            sub_path   = "prometheus.yml" 
-          } 
+            mount_path = "/etc/prometheus/prometheus.yml"
+            sub_path   = "prometheus.yml"
+          }
         }
-        volume { 
-          name = "prometheus-config-volume" 
+        volume {
+          name = "prometheus-config-volume"
 
-          config_map { 
-            name = kubernetes_config_map.prometheus_config.metadata[0].name 
-          } 
-        } 
+          config_map {
+            name = kubernetes_config_map.prometheus_config.metadata[0].name
+          }
+        }
       }
     }
   }
@@ -168,7 +168,7 @@ resource "kubernetes_service" "prometheus" {
 
   spec {
     selector = {
-      app = "prometheus" 
+      app = "prometheus"
     }
 
     port {
@@ -183,10 +183,10 @@ resource "kubernetes_service" "prometheus" {
 #  déploiement de Grafana
 resource "kubernetes_deployment" "grafana" {
   metadata {
-    name      = "grafana" 
+    name      = "grafana"
     namespace = kubernetes_namespace.final_project.metadata[0].name
     labels = {
-      app = "grafana" 
+      app = "grafana"
     }
   }
 
@@ -293,11 +293,11 @@ resource "kubernetes_service" "kube_state_metrics" {
       app = "kube-state-metrics"
     }
 
-    port { 
+    port {
       port        = 8080
       target_port = 8080
     }
 
-    type = "ClusterIP" 
+    type = "ClusterIP"
   }
 }
