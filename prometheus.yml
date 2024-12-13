@@ -7,7 +7,7 @@ scrape_configs:
       - targets: ['kube-state-metrics.final-project-devsecops.svc.cluster.local:8080']
 
   - job_name: 'webgoat'
-    metrics_path: '/WebGoat/actuator/prometheus' 
+    metrics_path: '/WebGoat/actuator/prometheus'
     static_configs:
       - targets: ['final-project-service.final-project-devsecops.svc.cluster.local:8080']
 
