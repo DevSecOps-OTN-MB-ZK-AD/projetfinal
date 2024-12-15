@@ -99,7 +99,7 @@ jobs:
                     format: sarif
                     output: trivy-report.sarif
                     timeout: 30m
-                    severity: 'CRITICAL,HIGH'
+                    severity: 'CRITICAL'
 
             -   name: Upload Trivy Report
                 uses: actions/upload-artifact@v3
@@ -107,12 +107,18 @@ jobs:
                     name: trivy-report
                     path: trivy-report.sarif
 
-            # Notify when fail via trivy (for critical vulnerabilities)
+            # Notify when fail via trivy (for critical vulnerabilities only)
             -   name: Notify via Webhook for critial vulnerabilities
                 run: |
-                    if grep -qi "CRITICAL" trivy-report.sarif; then
-                        curl -X POST -H 'Content-type: application/json' --data '{"text":"⚠️ Vulnérabilités critiques détectées ⚠️"}' ${{ secrets.DISCORD_WEBHOOK_URL }}
-                    fi
+                    curl -X POST -H "Content-Type: application/json" \
+                    -d "$(jq -r '.runs[].tool.driver.rules[] |
+                    select((.properties.tags[-1] // "") == "CRITICAL") |
+                    "- **ID**: " + (.id // "N/A") +
+                    "\\n - **Severity**: " + (.properties.tags[-1] // "N/A") +
+                    "\\n - **Description**: " + (.shortDescription.text // "N/A") +
+                    "\\n - **Link**: " + (.helpUri // "N/A") +
+                    "\\n"' trivy-report.sarif | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g' | awk '{print "{\"content\": \"**Vulnérabilités CRITIQUES détectées** ⚠️\\n" $0 "\"}"}')" \
+                    ${{ secrets.DISCORD_WEBHOOK_URL }}
     # minikube en local pour l'instant, aks prob à revoir si non possible prof donne accès pour déployer sur son serveur
     # deploy:
     #     runs-on: ubuntu-latest
