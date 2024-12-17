@@ -111,10 +111,10 @@ EOT
 # déploiement de Prometheus
 resource "kubernetes_deployment" "prometheus" {
   metadata {
-    name      = "prometheus" # Nom du déploiement
+    name      = "prometheus" 
     namespace = kubernetes_namespace.final_project.metadata[0].name
     labels = {
-      app = "prometheus" # Étiquette pour identifier les pods
+      app = "prometheus" 
     }
   }
 
@@ -211,7 +211,7 @@ resource "kubernetes_deployment" "grafana" {
           name  = "grafana" # Nom du conteneur
           image = "grafana/grafana:latest" # Image Docker de Grafana
           port {
-            container_port = 3000 # Port utilisé par Grafana
+            container_port = 3000 
           }
         }
       }
@@ -268,6 +268,8 @@ resource "kubernetes_deployment" "kube_state_metrics" {
       }
 
       spec {
+        service_account_name = "kube-state-metrics"
+
         container {
           name  = "kube-state-metrics"
           image = "registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.9.2"
