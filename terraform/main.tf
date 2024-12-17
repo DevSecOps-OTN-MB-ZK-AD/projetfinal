@@ -111,10 +111,10 @@ EOT
 # déploiement de Prometheus
 resource "kubernetes_deployment" "prometheus" {
   metadata {
-    name      = "prometheus" 
+    name      = "prometheus"
     namespace = kubernetes_namespace.final_project.metadata[0].name
     labels = {
-      app = "prometheus" 
+      app = "prometheus"
     }
   }
 
@@ -211,7 +211,7 @@ resource "kubernetes_deployment" "grafana" {
           name  = "grafana" # Nom du conteneur
           image = "grafana/grafana:latest" # Image Docker de Grafana
           port {
-            container_port = 3000 
+            container_port = 3000
           }
         }
       }
