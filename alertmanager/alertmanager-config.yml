@@ -18,5 +18,5 @@ data:
     receivers:
       - name: 'discord-webhook'
         webhook_configs:
-          - url_file: /etc/secrets/webhook-url   
+          - url_file: /etc/secrets/webhook-url
             send_resolved: true
