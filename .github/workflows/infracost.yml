@@ -1,7 +1,9 @@
 name: Infracost
 
 on:
-  pull_request:
+  push:
+    branches:
+      - master
     paths:
       - '**/*.tf'
 
